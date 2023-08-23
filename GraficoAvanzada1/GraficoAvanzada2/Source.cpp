@@ -1,6 +1,7 @@
 
 #include  <GL/glut.h>
 #include <cmath> 
+#include <iostream>
 
 void drawPolygon() {
     glColor3f(1.0, 0.0, 0.0); 
@@ -30,6 +31,15 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutMainLoop();
     return 0;
+}
+
+void Translate(float matriz [16], float y, float x)
+{
+    matriz[12] =+ matriz[0] * x + matriz[5] * y;
+    matriz[13] =+ matriz[1] * x + matriz[6] * y;
+    matriz[14] =+ matriz[3] * x + matriz[7] * y;
+    matriz[16] = +matriz[4] * x + matriz[8] * y;
+
 }
 
 
