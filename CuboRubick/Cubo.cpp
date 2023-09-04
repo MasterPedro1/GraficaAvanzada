@@ -1,169 +1,144 @@
-#include <windows.h>  // for MS Windows
-#include <GL/glut.h>  // GLUT, include glu.h and gl.h
+#include <windows.h>
+#include <GL/glut.h>
+#include <cmath>
 
-/* Global variables */
-char title[] = "3D Shapes";
-GLfloat pyramidRotationAngle = 0.0f;
-GLfloat pyramid2RotationAngle = 0.0f;
+char title[] = "Icosahedron Rubik 3D";
+float cameraRadius = 12.0f;
+float cameraAngle = 0.0f;
+float cameraHeight = 1.0f;
+float centerPosition[3] = { 0.0f, 0.0f, 0.0f };
+GLfloat drawBaseModelMatrix[16];
 
-/* Initialize OpenGL Graphics */
 void initGL() {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
-    glClearDepth(1.0f);                   // Set background depth to farthest
-    glEnable(GL_DEPTH_TEST);   // Enable depth testing for z-culling
-    glDepthFunc(GL_LEQUAL);    // Set the type of depth-test
-    glShadeModel(GL_SMOOTH);   // Enable smooth shading
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  // Nice perspective corrections
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glShadeModel(GL_SMOOTH);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glLoadIdentity();
+    glGetFloatv(GL_MODELVIEW_MATRIX, drawBaseModelMatrix);
 }
 
-void timer(int value) {
-    pyramidRotationAngle += 1.0f;  // Incremento del �ngulo de rotaci�n
-    if (pyramidRotationAngle > 360.0f) {
-        pyramidRotationAngle -= 360.0f;  // Asegurarse de que el �ngulo permanezca en el rango [0, 360)
-    }
-
-    glutPostRedisplay();  // Solicitar una nueva representaci�n de la escena
-    glutTimerFunc(16, timer, 0);  // Llamar a la funci�n de temporizador despu�s de 16 ms (aproximadamente 60 FPS)
-}
-
-void timer2(int value) {
-    pyramid2RotationAngle += 1.0f;  // Incremento del �ngulo de rotaci�n
-    if (pyramid2RotationAngle > 360.0f) {
-        pyramid2RotationAngle -= 360.0f;  // Asegurarse de que el �ngulo permanezca en el rango [0, 360)
-    }
-
-    glutPostRedisplay();  // Solicitar una nueva representaci�n de la escena
-    glutTimerFunc(16, timer2, 0);  // Llamar a la funci�n de temporizador despu�s de 16 ms (aproximadamente 60 FPS)
-}
-/* Handler for window-repaint event. Called back when the window first appears and
-   whenever the window needs to be re-painted. */
-void display() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color and depth buffers
-    glMatrixMode(GL_MODELVIEW);     // To operate on model-view matrix
-
-    // Render a color-cube consisting of 6 quads with different colors
-    glLoadIdentity();                 // Reset the model-view matrix
-    glTranslatef(1.5f, 0.0f, -7.0f);  // Move right and into the screen
-
-    glRotatef(pyramid2RotationAngle, 0.0f, 1.0f, 0.0f);
-
-    glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads
-    // Top face (y = 1.0f)
-    // Define vertices in counter-clockwise (CCW) order with normal pointing out
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-
-    // Bottom face (y = -1.0f)
-    glColor3f(1.0f, 0.5f, 0.0f);     // Orange
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-
-    // Front face  (z = 1.0f)
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-
-    // Back face (z = -1.0f)
-    glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, -1.0f);
-
-    // Left face (x = -1.0f)
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-
-    // Right face (x = 1.0f)
-    glColor3f(1.0f, 0.0f, 1.0f);     // Magenta
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glEnd();  // End of drawing color-cube
-
-    // Render a pyramid consists of 4 triangles
-    glLoadIdentity();                  // Reset the model-view matrix
-    glTranslatef(-1.5f, 0.0f, -6.0f);  // Move left and into the screen
-
-    glRotatef(pyramidRotationAngle, 0.0f, 1.0f, 0.0f);
-
-    glBegin(GL_TRIANGLES);           // Begin drawing the pyramid with 4 triangles
-    // Front
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(1.0f, -1.0f, 1.0f);
-
-    // Right
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(1.0f, -1.0f, -1.0f);
-
-    // Back
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-
-    // Left
-    glColor3f(1.0f, 0.0f, 0.0f);       // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);       // Blue
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glColor3f(0.0f, 1.0f, 0.0f);       // Green
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glEnd();   // Done drawing the pyramid
-
-    glutSwapBuffers();  // Swap the front and back frame buffers (double buffering)
-}
-
-/* Handler for window re-size event. Called back when the window first appears and
-   whenever the window is re-sized with its new width and height */
-void reshape(GLsizei width, GLsizei height) {  // GLsizei for non-negative integer
-    // Compute aspect ratio of the new window
-    if (height == 0) height = 1;                // To prevent divide by 0
-    GLfloat aspect = (GLfloat)width / (GLfloat)height;
-
-    // Set the viewport to cover the new window
+void reshape(int width, int height) {
     glViewport(0, 0, width, height);
-
-    // Set the aspect ratio of the clipping volume to match the viewport
-    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
-    glLoadIdentity();             // Reset
-    // Enable perspective projection with fovy, aspect, zNear and zFar
-    gluPerspective(45.0f, aspect, 0.1f, 100.0f);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0f, (float)width / height, 0.1f, 100.0f);
+    glMatrixMode(GL_MODELVIEW);
 }
 
-/* Main function: GLUT runs as a console application starting at main() */
+void drawEquilateralTriangle() {
+    glBegin(GL_TRIANGLES);
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    // Triángulo superior
+    glVertex3f(0.0f, 0.5f, 0.0f);
+    glVertex3f(-0.25f, 0.0f, 0.0f);
+    glVertex3f(0.25f, 0.0f, 0.0f);
+
+    // Triángulo izquierdo superior
+    glVertex3f(-0.25f, 0.0f, 0.0f);
+    glVertex3f(-0.5f, -0.5f, 0.0f);
+    glVertex3f(0.0f, -0.5f, 0.0f);
+
+    // Triángulo Medio Superior
+    glVertex3f(-0.25f, 0.0f, 0.0f);
+    glVertex3f(0.25f, 0.0f, 0.0f);
+    glVertex3f(0.0f, -0.5f, 0.0f);
+
+    // Triángulo derecho superior
+    glVertex3f(0.25f, 0.0f, 0.0f);
+    glVertex3f(0.0f, -0.5f, 0.0f);
+    glVertex3f(0.5f, -0.5f, 0.0f);
+
+    // Triángulo izquierdo medio
+    glVertex3f(-0.5f, -0.5f, 0.0f);
+    glVertex3f(-0.75f, -1.0f, 0.0f);
+    glVertex3f(-0.25f, -1.0f, 0.0f);
+
+    // Triángulo central medio
+    glVertex3f(0.0f, -0.5f, 0.0f);
+    glVertex3f(-0.25f, -1.0f, 0.0f);
+    glVertex3f(0.25f, -1.0f, 0.0f);
+
+    // Triángulo derecho medio
+    glVertex3f(0.5f, -0.5f, 0.0f);
+    glVertex3f(0.25f, -1.0f, 0.0f);
+    glVertex3f(0.75f, -1.0f, 0.0f);
+
+    glEnd();
+}
+
+void drawIcosahedronRubik() {
+    // Coordenadas de los vértices para un icosaedro regular
+    GLfloat phi = (1.0f + sqrt(5.0f)) / 2.0f;
+
+    GLfloat icosahedronVertices[12][3] = {
+        {-1, phi, 0}, {1, phi, 0}, {-1, -phi, 0}, {1, -phi, 0},
+        {0, -1, phi}, {0, 1, phi}, {0, -1, -phi}, {0, 1, -phi},
+        {phi, 0, -1}, {phi, 0, 1}, {-phi, 0, -1}, {-phi, 0, 1}
+    };
+
+    int icosahedronFaces[20][3] = {
+        {0, 11, 5}, {0, 5, 1}, {0, 1, 7}, {0, 7, 10}, {0, 10, 11},
+        {1, 5, 9}, {5, 11, 4}, {11, 10, 2}, {10, 7, 6}, {7, 1, 8},
+        {3, 9, 4}, {3, 4, 2}, {3, 2, 6}, {3, 6, 8}, {3, 8, 9},
+        {4, 9, 5}, {2, 4, 11}, {6, 2, 10}, {8, 6, 7}, {9, 8, 1}
+    };
+
+    glBegin(GL_TRIANGLES);
+    for (int i = 0; i < 20; i++) {
+        if (i % 3 == 0)
+            glColor3f(1.0f, 0.0f, 0.0f);  // Rojo
+        else if (i % 3 == 1)
+            glColor3f(0.0f, 1.0f, 0.0f);  // Verde
+        else
+            glColor3f(0.0f, 0.0f, 1.0f);  // Azul
+
+        for (int j = 0; j < 3; j++) {
+            int vertexIndex = icosahedronFaces[i][j];
+            glVertex3fv(icosahedronVertices[vertexIndex]);
+        }
+    }
+    glEnd();
+}
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    float cameraX = centerPosition[0] + cameraRadius * sin(cameraAngle);
+    float cameraZ = centerPosition[2] + cameraRadius * cos(cameraAngle);
+
+    gluLookAt(cameraX, cameraHeight, cameraZ, centerPosition[0], centerPosition[1], centerPosition[2], 0.0f, 1.0f, 0.0f);
+
+    drawIcosahedronRubik();
+
+    glutSwapBuffers();
+}
+
+// Función de actualización de la cámara
+void updateCamera(int value) {
+    cameraAngle += 0.005f; // Ajusta la velocidad de rotación
+    if (cameraAngle > 2 * 3.14) {
+        cameraAngle -= 2 * 3.14;
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(16, updateCamera, 0); // 60 FPS
+}
+
 int main(int argc, char** argv) {
-    glutInit(&argc, argv);            // Initialize GLUT
-    glutInitDisplayMode(GLUT_DOUBLE); // Enable double buffered mode
-    glutInitWindowSize(640, 480);   // Set the window's initial width & height
-    glutInitWindowPosition(50, 50); // Position the window's initial top-left corner
-    glutCreateWindow(title);          // Create window with the given title
-    glutDisplayFunc(display);       // Register callback handler for window re-paint event
-    glutReshapeFunc(reshape);       // Register callback handler for window re-size event
-    initGL();                       // Our own OpenGL initialization
-    glutTimerFunc(0, timer, 0);
-    glutTimerFunc(0, timer2, 0);
-    glutMainLoop();                 // Enter the infinite event-processing loop
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow(title);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    initGL();
+    glutTimerFunc(0, updateCamera, 0);
+    glutMainLoop();
     return 0;
 }
