@@ -5,7 +5,6 @@
 #define M_PI 3.14159265358979323846
 #include <vector>
 
-
 char title[] = "Icosahedron Rubik 3D";
 float cameraRadius = 12.0f;
 float cameraAngle = 0.0f;
@@ -14,7 +13,6 @@ float centerPosition[3] = { 0.0f, 0.0f, 0.0f };
 GLfloat drawBaseModelMatrix[16];
 int lastMouseX, lastMouseY;
 bool mouseRotating = false;
-
 
 GLfloat phi = (1.0f + sqrt(5.0f)) / 2.0f;
 
@@ -39,6 +37,8 @@ int faceVerticesIndices[5][3] = {
     {9, 10, 11},  // Cara 4
     {12, 13, 14}  // Cara 5
 };
+
+GLfloat transformedIcosahedronVertices[12][3]; // Array para almacenar las coordenadas transformadas de los vértices
 
 void initGL() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -90,15 +90,12 @@ void subdivideTriangle(float* v1, float* v2, float* v3) {
     glEnd();
 }
 
-
-
 void drawIcosahedronRubik() {
-    // Lista de colores únicos para cada cara
     GLfloat colors[20][3] = {
-        {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 1.0f},
-        {0.0f, 1.0f, 1.0f}, {0.5f, 0.5f, 0.0f}, {0.0f, 0.5f, 0.5f}, {0.5f, 0.0f, 0.5f}, {0.5f, 0.5f, 0.5f},
-        {0.0f, 0.25f, 0.25f}, {0.25f, 0.0f, 0.25f}, {0.25f, 0.25f, 0.0f}, {0.75f, 0.75f, 0.75f}, {0.0f, 0.75f, 0.75f},
-        {0.75f, 0.0f, 0.75f}, {0.75f, 0.75f, 0.0f}, {0.25f, 0.5f, 0.75f}, {0.75f, 0.25f, 0.5f}, {0.5f, 0.75f, 0.25f}
+       {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 1.0f},
+       {0.0f, 1.0f, 1.0f}, {0.5f, 0.5f, 0.0f}, {0.0f, 0.5f, 0.5f}, {0.5f, 0.0f, 0.5f}, {0.5f, 0.5f, 0.5f},
+       {0.0f, 0.25f, 0.25f}, {0.25f, 0.0f, 0.25f}, {0.25f, 0.25f, 0.0f}, {0.75f, 0.75f, 0.75f}, {0.0f, 0.75f, 0.75f},
+       {0.75f, 0.0f, 0.75f}, {0.75f, 0.75f, 0.0f}, {0.25f, 0.5f, 0.75f}, {0.75f, 0.25f, 0.5f}, {0.5f, 0.75f, 0.25f}
     };
 
     for (int i = 0; i < 20; i++) {
@@ -114,6 +111,7 @@ void drawIcosahedronRubik() {
         float v2[3] = { icosahedronVertices[v2Index][0], icosahedronVertices[v2Index][1], icosahedronVertices[v2Index][2] };
         float v3[3] = { icosahedronVertices[v3Index][0], icosahedronVertices[v3Index][1], icosahedronVertices[v3Index][2] };
 
+        // Dibuja las caras con las coordenadas originales de los vértices
         glVertex3fv(v1);
         glVertex3fv(v2);
         glVertex3fv(v3);
@@ -132,7 +130,8 @@ void display() {
 
     gluLookAt(cameraX, cameraHeight, cameraZ, centerPosition[0], centerPosition[1], centerPosition[2], 0.0f, 1.0f, 0.0f);
 
-    drawIcosahedronRubik();  // Dibuja las caras de los triángulos con colores únicos
+    // Dibujar las caras estáticas
+    drawIcosahedronRubik();
 
     glutSwapBuffers();
 }
@@ -161,7 +160,6 @@ void motion(int x, int y) {
         glutPostRedisplay();
     }
 }
-
 
 void rotateVertex(int vertexIndex, float angle) {
     // Obtener el vértice a rotar
@@ -243,6 +241,15 @@ void rotateVertex(int vertexIndex, float angle) {
     }
 }
 
+void updateTransformedVertices() {
+    for (int i = 0; i < 12; i++) {
+        float* vertex = icosahedronVertices[i];
+        float* transformedVertex = transformedIcosahedronVertices[i];
+        for (int j = 0; j < 3; j++) {
+            transformedVertex[j] = vertex[j];
+        }
+    }
+}
 
 void keyboard(unsigned char key, int x, int y) {
     // Llama a la función rotateVertex para rotar el vértice correspondiente
@@ -251,27 +258,11 @@ void keyboard(unsigned char key, int x, int y) {
     case '1': // Rotar vértice 1 (arriba)
         rotateVertex(0, rotationAngle);
         break;
-    case '2': // Rotar vértice 2 (abajo)
-        rotateVertex(1, rotationAngle);
-        break;
-    case '3': // Rotar vértice 3 (frente)
-        rotateVertex(2, rotationAngle);
-        break;
-    case '4': // Rotar vértice 4 (atrás)
-        rotateVertex(3, rotationAngle);
-        break;
-    case '5': // Rotar vértice 5 (izquierda)
-        rotateVertex(4, rotationAngle);
-        break;
-    case '6': // Rotar vértice 6 (derecha)
-        rotateVertex(5, rotationAngle);
-        break;
-    default:
-        break;
     }
+
+    updateTransformedVertices();
     glutPostRedisplay();
 }
-
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
@@ -284,6 +275,7 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
+    updateTransformedVertices();
     glutMainLoop();
     return 0;
 }
